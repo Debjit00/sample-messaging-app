@@ -21,7 +21,9 @@
   <script src="/socket.io/socket.io.js"></script>
   <script>
     // Establish Socket.IO connection
-    const socket = io();
+    const socket = io({
+        secure: true
+    });
     
     // DOM elements
     const messageForm = document.getElementById('message-form');
