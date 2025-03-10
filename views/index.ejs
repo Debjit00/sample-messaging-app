@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Real-time Messaging</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Simple Messaging App</h1>
+    
+    <div id="messages"></div>
+    
+    <form id="message-form">
+      <input type="text" id="message-input" placeholder="Type a message..." autocomplete="off" required>
+      <button type="submit">Send</button>
+    </form>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    // Establish Socket.IO connection
+    const socket = io();
+    
+    // DOM elements
+    const messageForm = document.getElementById('message-form');
+    const messageInput = document.getElementById('message-input');
+    const messagesDiv = document.getElementById('messages');
+    
+    // Handle form submission
+    messageForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const message = messageInput.value.trim();
+      if (message) {
+        // Send message to server
+        socket.emit('chat message', message);
+        messageInput.value = '';
+        messageInput.focus();
+      }
+    });
+    
+    // Receive and display messages
+    socket.on('chat message', (msg) => {
+      const messageElement = document.createElement('div');
+      messageElement.className = 'message';
+      messageElement.textContent = msg;
+      messagesDiv.appendChild(messageElement);
+      
+      // Auto-scroll to the latest message
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    });
+  </script>
+</body>
+</html>
