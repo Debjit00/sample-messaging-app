@@ -6,12 +6,25 @@ const path = require('path');
 // Create Express app
 const app = express();
 const server = http.createServer(app);
-// const io = socketIo(server);
+
+// Force HTTPS redirect
+app.enable('trust proxy');
+app.use((req, res, next) => {
+  if (req.secure || process.env.NODE_ENV !== 'production') {
+    next();
+  } else {
+    res.redirect(`https://${req.headers.host}${req.url}`);
+  }
+});
+
+// Set up Socket.IO with secure configuration
 const io = socketIo(server, {
-    cors: {
-      origin: "*",
-      methods: ["GET", "POST"]
-    }
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  },
+  transports: ['websocket', 'polling'],
+  secure: true
 });
 
 // Set EJS as the view engine
@@ -21,17 +34,10 @@ app.set('views', path.join(__dirname, 'views'));
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use((req, res, next) => {
-    if (req.headers['x-forwarded-proto'] !== 'https' && process.env.NODE_ENV === 'production') {
-      return res.redirect(`https://${req.headers.host}${req.url}`);
-    }
-    next();
-});
 // Routes
 app.get('/', (req, res) => {
   res.render('index');
 });
-
 
 // Socket.IO connection handling
 io.on('connection', (socket) => {

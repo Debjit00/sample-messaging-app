@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
   <title>Real-time Messaging</title>
   <link rel="stylesheet" href="/styles.css">
 </head>
@@ -20,9 +21,14 @@
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
-    // Establish Socket.IO connection
+    // Establish Socket.IO connection with secure options
+    const protocol = window.location.protocol;
+    const isSecure = protocol === 'https:';
+    
     const socket = io({
-        secure: true
+      secure: true,
+      rejectUnauthorized: false,
+      transports: ['websocket', 'polling']
     });
     
     // DOM elements
@@ -52,6 +58,15 @@
       
       // Auto-scroll to the latest message
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    });
+
+    // Connection status handling
+    socket.on('connect', () => {
+      console.log('Connected to server');
+    });
+
+    socket.on('connect_error', (error) => {
+      console.error('Connection error:', error);
     });
   </script>
 </body>
